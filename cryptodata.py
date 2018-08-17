@@ -65,7 +65,8 @@ class BaseStrategy:
 		self.total_loss = 0
 
 	def add_trade(self, c, typ):
-		price = c.hl2()
+		#price = c.hl2()
+		price = c.close
 		x = self.pfrac * self.capital
 		if typ == "SHORT":
 			if self.position > 0: # Close long position before going short
