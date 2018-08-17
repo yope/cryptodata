@@ -158,8 +158,8 @@ class Coindata:
 		return candles
 
 if __name__ == "__main__":
-	cd = Coindata("BTC", "USD", "1D")
-	candles = cd.get_candles(100)
+	cd = Coindata("BTC", "USD", "1h")
+	candles = cd.get_candles(200)
 	s = OutsideBarStrategy(candles)
 	s.run()
 	for c in candles:
