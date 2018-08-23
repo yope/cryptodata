@@ -19,15 +19,15 @@ class Candle:
 		self.volumeto = obj["volumeto"]
 		self.opents = obj["time"]
 		self.length = secs
-		self.textabove = None
-		self.textbelow = None
+		self.textabove = []
+		self.textbelow = []
 
 	def __repr__(self):
 		ret = "<Candle {} secs from {}, open:{}, close:{}, low:{}, high:{}".format(self.length, self.opents, self.open, self.close, self.low, self.high)
-		if self.textabove is not None:
-			ret += ", above:{}".format(self.textabove)
+		if self.textabove:
+			ret += ", above:{}".format(";".join(self.textabove))
 		if self.textbelow is not None:
-			ret += ", below:{}".format(self.textbelow)
+			ret += ", below:{}".format(";".join(self.textbelow))
 		ret += ">"
 		return ret
 
@@ -45,9 +45,10 @@ class Candle:
 
 	def add_annotation(self, text, above=False):
 		if above:
-			self.textabove = text
+			self.textabove.append(text)
 		else:
-			self.textbelow = text
+			self.textbelow.append(text)
+
 
 class BaseStrategy:
 	def __init__(self, candles, pyramiding=1):
