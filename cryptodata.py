@@ -116,6 +116,7 @@ class BaseStrategy:
 		self.losers = 0
 		self.total_win = 0
 		self.total_loss = 0
+		self.stoploss = None
 
 	def add_trade(self, c, typ, amount=None, price=None):
 		if price is None:
@@ -163,6 +164,11 @@ class BaseStrategy:
 		self.add_trade(c, "SHORT", amount=amount, price=price)
 		self.longshort -= 1
 		return True
+
+	def stop_out(self, stop):
+		d = "SHORT" if self.position > 0 else "LONG"
+		self.add_trade(None, d, abs(self.position), stop.level)
+		self.stoploss = None
 
 	def run(self):
 		pass
