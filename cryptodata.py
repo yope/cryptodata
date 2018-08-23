@@ -279,6 +279,8 @@ class Coindata:
 		r = requests.get(url).json()
 		data = r["Data"]
 		candles = [Candle(x, self.secmul * self.tfunits) for x in data]
+		if len(candles) < n:
+			candles = self.get_candles(n - len(candles), endts=data[0]["time"]) + candles
 		return candles
 
 if __name__ == "__main__":
