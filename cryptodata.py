@@ -79,6 +79,21 @@ class Candle:
 			tabove = ""
 		print(offs + color + lwick + body + hwick + "\x1b[0m" + tabove)
 
+class StopLoss:
+	def __init__(self, strategy, level, typ):
+		self.typ = typ
+		self.strategy = strategy
+		self.level = level
+
+	def test_candle(self, c):
+		stop = False
+		if self.typ == "LONG" and c.low < self.level:
+			stop = True
+		elif self.typ == "SHORT" and c.high > self.level:
+			stop = True
+		if stop:
+			print("Stopped out {} at {}, level {}".format(self.typ, c.low, self.level))
+			self.strategy.stop_out(self)
 
 class BaseStrategy:
 	def __init__(self, candles, pyramiding=1):
