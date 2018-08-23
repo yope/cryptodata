@@ -117,10 +117,13 @@ class BaseStrategy:
 		self.total_win = 0
 		self.total_loss = 0
 
-	def add_trade(self, c, typ):
-		#price = c.hl2()
-		price = c.close
-		x = self.pfrac * self.capital
+	def add_trade(self, c, typ, amount=None, price=None):
+		if price is None:
+			price = c.close
+		if amount is None:
+			x = self.pfrac * self.capital
+		else:
+			x = amount
 		if typ == "SHORT":
 			if self.position > 0: # Close long position before going short
 				x += self.position * price
@@ -144,7 +147,8 @@ class BaseStrategy:
 			self.losers += 1
 			self.total_loss += delta
 		self.equity = eq
-		c.add_annotation(typ)
+		if c is not None:
+			c.add_annotation(typ, above=(typ=="SHORT"))
 
 	def go_long(self, c):
 		if self.longshort >= self.pyramiding:
