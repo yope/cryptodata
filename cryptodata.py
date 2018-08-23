@@ -98,6 +98,13 @@ class StopLoss:
 class BaseStrategy:
 	def __init__(self, candles, pyramiding=1):
 		self.candles = candles
+		self.pmin = 999999999999
+		self.pmax = 0
+		for c in candles:
+			if c.high > self.pmax:
+				self.pmax = c.high
+			if c.low < self.pmin:
+				self.pmin = c.low
 		self.startcapital = self.capital = 1000
 		self.position = 0
 		self.equity = self.capital
