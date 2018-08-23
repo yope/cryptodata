@@ -8,6 +8,7 @@
 import requests
 import os
 import sys
+from collections import deque
 
 class Candle:
 	def __init__(self, obj, secs):
@@ -241,6 +242,58 @@ class PivotalReversalStrategy(BaseStrategy):
 					self.cph.add_annotation("STOP", above=True)
 					print("SHORT at {} stop loss at {}".format(self.lprice, self.hprice))
 					self.got_swh = False
+
+class Sma:
+	def __init__(self, n):
+		self.length = n
+		self.deq = deque(maxlen=n)
+
+	def consume_candle(self, c):
+		self.deq.append(c.hl2())
+
+	def get_value(self):
+		if len(self.deq) < self.length:
+			return None
+		return sum(self.deq) / self.length
+
+class Ema(Sma):
+	def get_value(self):
+		if len(self.deq) < self.length:
+			return None
+		c = 2.0 / (self.length + 1)
+		cema = self.deq[0]
+		for v in self.deq:
+			cema = (c * v) + ((1 - c) * cema)
+		return cema
+
+class SmaCrossStrategy(BaseStrategy):
+	def __init__(self, candles, pyramiding=1, sma1=21, sma2=55):
+		super().__init__(candles, pyramiding)
+		self.ma1 = Sma(sma1)
+		self.ma2 = Sma(sma2)
+		self.golden = False
+
+	def run(self):
+		for i in range(len(self.candles)):
+			c = self.candles[i]
+			self.ma1.consume_candle(c)
+			self.ma2.consume_candle(c)
+			s1 = self.ma1.get_value()
+			s2 = self.ma2.get_value()
+			if s1 is None or s2 is None:
+				continue
+			if s1 > s2 and not self.golden:
+				self.golden = True
+				self.go_long(c)
+			elif s1 < s2 and self.golden:
+				self.golden = False
+				self.go_short(c)
+
+class MacdStrategy(SmaCrossStrategy):
+	def __init__(self, candles, pyramiding=1, ema=21, sma=55):
+		super().__init__(candles, pyramiding, sma1=ema, sma2=sma)
+		self.ma1 = Ema(ema)
+		self.golden = False
 
 class Coindata:
 	def __init__(self, coin, fiat, tf):
