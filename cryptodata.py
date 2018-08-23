@@ -284,17 +284,39 @@ class Coindata:
 		return candles
 
 if __name__ == "__main__":
-	cd = Coindata("BTC", "USD", "1h")
-	candles = cd.get_candles(200)
-	s = OutsideBarStrategy(candles)
+	args = sys.argv[1:]
+	if len(args) < 4:
+		print("Usage: ./cryptodata.py <token> <fiat> <tf> <n> [<strategy>]")
+		print("\n  where <token> is the name of the asset (btc, eth, etc...),")
+		print("        <fiat> is the fiat currency to trade against (usd, eur, etc...")
+		print("        <tf> is the time-frame (1h, 12h, 1D, ...)")
+		print("        <n> is the amount of candles to get from server")
+		print("        <strategy> (optional, default: PivotalReversalStrategy)")
+		print("                   any of: OutsideBarStrategy, PivotalReversalStrategy...")
+		sys.exit(0)
+	tok = args[0].upper()
+	fiat = args[1].upper()
+	tf = args[2]
+	cd = Coindata(tok, fiat, tf)
+	n = int(args[3])
+	if len(args) > 4:
+		sname = args[4]
+		if not sname in globals():
+			print("No strategy class found with name: {}".format(sname))
+			sys.exit(1)
+	else:
+		sname = "PivotalReversalStrategy"
+	candles = cd.get_candles(n)
+	#s = OutsideBarStrategy(candles)
+	s = globals()[sname](candles)
 	s.run()
 	for c in candles:
-		print(repr(c))
+		c.plot(s.pmin, s.pmax)
 	print("Trades:")
 	for i in range(len(s.trades)):
 		t = s.trades[i]
 		print("  Trade {:3d}: type: {:5s}, equity: {:5.2f}, delta: {:3.2f}".format(i, t[0], t[1], t[2]))
-	print("Strategy performance:")
+	print("Strategy performance over {} candles of {}:".format(len(candles), cd.tf))
 	print("  position at end: {}".format(s.position))
 	print("  capital at end:  {}".format(s.capital))
 	print("  Closing all positions: {:5.2f}".format(s.capital + s.position * candles[-1].close))
