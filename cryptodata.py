@@ -150,17 +150,19 @@ class BaseStrategy:
 		if c is not None:
 			c.add_annotation(typ, above=(typ=="SHORT"))
 
-	def go_long(self, c):
+	def go_long(self, c, amount=None, price=None):
 		if self.longshort >= self.pyramiding:
-			return
-		self.add_trade(c, "LONG")
+			return False
+		self.add_trade(c, "LONG", amount=amount, price=price)
 		self.longshort += 1
+		return True
 
-	def go_short(self, c):
+	def go_short(self, c, amount=None, price=None):
 		if self.longshort <= -(self.pyramiding - 1):
-			return
-		self.add_trade(c, "SHORT")
+			return False
+		self.add_trade(c, "SHORT", amount=amount, price=price)
 		self.longshort -= 1
+		return True
 
 	def run(self):
 		pass
