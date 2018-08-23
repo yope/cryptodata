@@ -49,6 +49,36 @@ class Candle:
 		else:
 			self.textbelow.append(text)
 
+	def plot(self, pmin, pmax):
+		prange = pmax - pmin
+		cpp = 120.0 / prange
+		offl = int(cpp * (self.low - pmin)) + 10
+		if self.textbelow:
+			tb = ";".join(self.textbelow)
+			offl -= len(tb)
+			offl -= 4
+			offs = " " * offl
+			offs += tb + " -> "
+		else:
+			offs = " " * offl
+		if self.close > self.open:
+			color = "\x1b[32m"
+			lwick = "-" * int(cpp * (self.open - self.low))
+			body = "#" * int(cpp * (self.close - self.open))
+			hwick = "-" * int(cpp * (self.high - self.close))
+		else:
+			color = "\x1b[31m"
+			lwick = "-" * int(cpp * (self.close - self.low))
+			body = "#" * int(cpp * (self.open - self.close))
+			hwick = "-" * int(cpp * (self.high - self.open))
+		if len(body) < 1:
+			body = "|"
+		if self.textabove:
+			tabove = " <- " + ";".join(self.textabove)
+		else:
+			tabove = ""
+		print(offs + color + lwick + body + hwick + "\x1b[0m" + tabove)
+
 
 class BaseStrategy:
 	def __init__(self, candles, pyramiding=1):
