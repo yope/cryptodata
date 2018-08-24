@@ -174,6 +174,12 @@ class BaseStrategy:
 		self.add_trade(None, d, 0, stop.level)
 		self.stoploss = None
 
+	def funds_ok(self):
+		if self.capital <= 0.0:
+			print("Liquidated!!!!!")
+			return False
+		return True
+
 	def run(self):
 		pass
 
@@ -187,6 +193,8 @@ class OutsideBarStrategy(BaseStrategy):
 					self.go_long(c)
 				elif c.close < c.open:
 					self.go_short(c)
+			if not self.funds_ok():
+				break
 
 class PivotalReversalStrategy(BaseStrategy):
 	def __init__(self, candles, pyramiding=1, leftbars=4, rightbars=2):
@@ -245,6 +253,8 @@ class PivotalReversalStrategy(BaseStrategy):
 					self.cph.add_annotation("STOP", above=True)
 					print("SHORT at {} stop loss at {}".format(self.lprice, self.hprice))
 					self.got_swh = False
+			if not self.funds_ok():
+				break
 
 class Sma:
 	def __init__(self, n):
@@ -291,6 +301,8 @@ class SmaCrossStrategy(BaseStrategy):
 			elif s1 < s2 and self.golden:
 				self.golden = False
 				self.go_short(c)
+			if not self.funds_ok():
+				break
 
 class MacdStrategy(SmaCrossStrategy):
 	def __init__(self, candles, pyramiding=1, ema=21, sma=55):
