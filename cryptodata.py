@@ -122,18 +122,21 @@ class BaseStrategy:
 	def add_trade(self, c, typ, amount=None, price=None):
 		if price is None:
 			price = c.close
+		# First close any opposite positions...
+		if typ == "SHORT" and self.position > 0:
+			self.capital += self.position * price
+			self.position = 0
+		elif typ == "LONG" and self.position < 0:
+			self.capital += self.position * price
+			self.position = 0
 		if amount is None:
 			x = self.pfrac * self.capital
 		else:
 			x = amount
 		if typ == "SHORT":
-			if self.position > 0: # Close long position before going short
-				x += self.position * price
 			self.capital += x
 			self.position -= x / price
 		elif typ == "LONG":
-			if self.position < 0: # Close short position before going long
-				x -= self.position * price
 			self.capital -= x
 			self.position += x / price
 		else:
