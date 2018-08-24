@@ -93,7 +93,7 @@ class StopLoss:
 		elif self.typ == "SHORT" and c.high > self.level:
 			stop = True
 		if stop:
-			print("Stopped out {} at {}, level {}".format(self.typ, c.low, self.level))
+			print("Stopped out {} at {}, candle low {}".format(self.typ, self.level, c.low))
 			self.strategy.stop_out(self)
 
 class BaseStrategy:
