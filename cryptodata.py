@@ -153,7 +153,9 @@ class BaseStrategy:
 			self.total_loss += delta
 		self.equity = eq
 		if c is not None:
-			c.add_annotation(typ, above=(typ=="SHORT"))
+			above = (typ=="SHORT")
+			typ = "{}({})".format(typ, x)
+			c.add_annotation(typ, above=above)
 
 	def go_long(self, c, amount=None, price=None):
 		if self.longshort >= self.pyramiding:
