@@ -171,7 +171,7 @@ class BaseStrategy:
 
 	def stop_out(self, stop):
 		d = "SHORT" if self.position > 0 else "LONG"
-		self.add_trade(None, d, abs(self.position), stop.level)
+		self.add_trade(None, d, 0, stop.level)
 		self.stoploss = None
 
 	def run(self):
