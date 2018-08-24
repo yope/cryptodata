@@ -307,7 +307,7 @@ class SmaCrossStrategy(BaseStrategy):
 				break
 
 class MacdStrategy(SmaCrossStrategy):
-	def __init__(self, candles, pyramiding=1, ema=21, sma=55):
+	def __init__(self, candles, pyramiding=1, ema=12, sma=26):
 		super().__init__(candles, pyramiding, sma1=ema, sma2=sma)
 		self.ma1 = Ema(ema)
 		self.golden = False
