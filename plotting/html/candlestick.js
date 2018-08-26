@@ -90,12 +90,16 @@ class Candle extends BaseObject {
 class Chart {
 	constructor(svg, begintime, endtime, minprice, maxprice) {
 		this.svg = svg;
+		this.objects = [];
+		this.set_window(begintime, endtime, minprice, maxprice);
+	}
+
+	set_window(begintime, endtime, minprice, maxprice) {
 		this.begintime = begintime;
 		this.endtime = endtime;
 		this.minprice = minprice;
 		this.maxprice = maxprice;
-		this.objects = [];
-		this.set_size();
+		this.handle_resize();
 	}
 
 	set_size() {
