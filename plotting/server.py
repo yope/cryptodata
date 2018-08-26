@@ -11,7 +11,7 @@ import os
 import functools
 from aiohttp import web
 
-class HTTPServer(object):
+class HTTPServer:
 	def __init__(self, port=8080):
 		self.app = web.Application()
 		pwd = os.path.normpath(os.path.dirname(__file__))
