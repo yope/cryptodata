@@ -28,28 +28,46 @@ class Candle extends BaseObject {
 		this.chart.add_object(this);
 	}
 
-	_make_wick(p0, p1, x, w, color) {
-		let wick = document.createElementNS(svgns, "line");
+	_resize_wick(wick, p0, p1, x, w) {
 		let wickw = Math.max(w * 0.05, 1);
 		wick.setAttributeNS(null, "y1", this.chart.p2y(p0));
 		wick.setAttributeNS(null, "y2", this.chart.p2y(p1));
 		wick.setAttributeNS(null, "x1", x + w / 2);
 		wick.setAttributeNS(null, "x2", x + w / 2);
-		wick.setAttributeNS(null, "stroke", color);
 		wick.setAttributeNS(null, "stroke-width", wickw);
+	}
+
+	_make_wick(color) {
+		let wick = document.createElementNS(svgns, "line");
+		wick.setAttributeNS(null, "stroke", color);
 		return wick;
 	}
 
 	create() {
 		let svg = this.chart.svg;
-		let d = this.data;
-		var color, price1, price2
-		if (d.close < d.open) {
+		var color;
+		if (this.data.close < this.data.open)
 			color = "red";
+		else
+			color = "green";
+		this.body = document.createElementNS(svgns, "rect");
+		this.body.setAttributeNS(null, "fill", color);
+		this.body.setAttributeNS(null, "stroke", color);
+		svg.appendChild(this.body);
+		this.lwick = this._make_wick(color);
+		svg.appendChild(this.lwick);
+		this.hwick = this._make_wick(color);
+		svg.appendChild(this.hwick);
+		this.resize();
+	}
+
+	resize() {
+		let d = this.data;
+		var price1, price2
+		if (d.close < d.open) {
 			price1 = d.close;
 			price2 = d.open;
 		} else {
-			color = "green";
 			price1 = d.open;
 			price2 = d.close;
 		}
@@ -57,23 +75,15 @@ class Candle extends BaseObject {
 		let price3 = d.high;
 		let p0 = this.chart.tp2xy(d.opents, price2);
 		let p1 = this.chart.tp2xy(d.opents + d.length, price1);
-		let body = document.createElementNS(svgns, "rect");
 		let bh = p1[1] - p0[1];
 		let bw = p1[0] - p0[0];
 		let margin = bw * 0.1;
-		body.setAttributeNS(null, "fill", color);
-		body.setAttributeNS(null, "stroke", color);
-		body.setAttributeNS(null, "x", p0[0] + margin / 2);
-		body.setAttributeNS(null, "y", p0[1]);
-		body.setAttributeNS(null, "width", bw - margin);
-		body.setAttributeNS(null, "height", bh);
-		svg.appendChild(body);
-		this.body = body;
-		this.lwick = this._make_wick(price0, price1, p0[0], bw, color);
-		svg.appendChild(this.lwick);
-		let hwick = document.createElementNS(svgns, "line");
-		this.hwick = this._make_wick(price2, price3, p0[0], bw, color);
-		svg.appendChild(this.hwick);
+		this.body.setAttributeNS(null, "x", p0[0] + margin / 2);
+		this.body.setAttributeNS(null, "y", p0[1]);
+		this.body.setAttributeNS(null, "width", bw - margin);
+		this.body.setAttributeNS(null, "height", bh);
+		this._resize_wick(this.lwick, price0, price1, p0[0], bw)
+		this._resize_wick(this.hwick, price2, price3, p0[0], bw)
 	}
 }
 
