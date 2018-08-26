@@ -154,13 +154,33 @@ class CommandHandler {
 		this.chart = chart;
 	}
 
+	_norm_price(p, lim, rfunc) {
+		let i = 0, j = 0;
+		while (p < lim) {
+			p *= 10.0;
+			i ++;
+		}
+		while (p > lim) {
+			p /= 10.0;
+			j ++;
+		}
+		p = rfunc(p);
+		while (j--)
+			p *= 10.0;
+		while (i--)
+			p /= 10.0;
+		return p;
+	}
+
 	handle_object(obj) {
 		switch(obj.class) {
 		case "candle":
 			let c = new Candle(this.chart, obj.data);
 			break;
 		case "chart":
-			this.chart.set_window(obj.begintime, obj.endtime, obj.minprice, obj.maxprice);
+			let minp = this._norm_price(obj.minprice, 10, Math.floor);
+			let maxp = this._norm_price(obj.maxprice, 10, Math.ceil);
+			this.chart.set_window(obj.begintime, obj.endtime, minp, maxp);
 			break;
 		default:
 			console.log("Undefined command object:", obj.class);
