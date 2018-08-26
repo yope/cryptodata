@@ -43,6 +43,15 @@ class Candle extends BaseObject {
 		return wick;
 	}
 
+	_create_text(text, color) {
+		let t = document.createElementNS(svgns, "text");
+		t.innerHTML = text;
+		t.setAttributeNS(null, "fill", color);
+		t.setAttributeNS(null, "stroke", null);
+		t.setAttributeNS(null, "font-size", 10);
+		return t;
+	}
+
 	create() {
 		let svg = this.chart.svg;
 		var color;
@@ -58,6 +67,18 @@ class Candle extends BaseObject {
 		svg.appendChild(this.lwick);
 		this.hwick = this._make_wick(color);
 		svg.appendChild(this.hwick);
+		this.t_below = [];
+		this.t_above = [];
+		for (let i = 0, il = this.data.textbelow.length; i < il; i++) {
+			let t = this._create_text(this.data.textbelow[i], "blue");
+			this.t_below.push(t);
+			svg.appendChild(t);
+		}
+		for (let i = 0, il = this.data.textabove.length; i < il; i++) {
+			let t = this._create_text(this.data.textabove[i], "blue");
+			this.t_above.push(t);
+			svg.appendChild(t);
+		}
 		this.resize();
 	}
 
@@ -77,13 +98,25 @@ class Candle extends BaseObject {
 		let p1 = this.chart.tp2xy(d.opents + d.length, price1);
 		let bh = p1[1] - p0[1];
 		let bw = p1[0] - p0[0];
-		let margin = bw * 0.1;
+		let margin = bw * 0.2;
 		this.body.setAttributeNS(null, "x", p0[0] + margin / 2);
 		this.body.setAttributeNS(null, "y", p0[1]);
 		this.body.setAttributeNS(null, "width", bw - margin);
 		this.body.setAttributeNS(null, "height", bh);
-		this._resize_wick(this.lwick, price0, price1, p0[0], bw)
-		this._resize_wick(this.hwick, price2, price3, p0[0], bw)
+		this._resize_wick(this.lwick, price0, price1, p0[0], bw);
+		this._resize_wick(this.hwick, price2, price3, p0[0], bw);
+		let ymin = this.chart.p2y(price0);
+		let ymax = this.chart.p2y(price3);
+		for (let i = 0, il = this.t_below.length; i < il; i++) {
+			let t = this.t_below[i];
+			t.setAttributeNS(null, "x", p0[0]);
+			t.setAttributeNS(null, "y", ymin + 10 + i * 10);
+		}
+		for (let i = 0, il = this.t_above.length; i < il; i++) {
+			let t = this.t_above[i];
+			t.setAttributeNS(null, "x", p0[0]);
+			t.setAttributeNS(null, "y", ymax - 10 - i * 10);
+		}
 	}
 }
 
