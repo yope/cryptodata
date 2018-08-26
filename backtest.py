@@ -14,7 +14,7 @@ from strategies.tradingview import OutsideBarStrategy, PivotalReversalStrategy
 from datasource.cryptocompare import Coindata
 
 class SmaCrossStrategy(BaseStrategy):
-	def __init__(self, candles, pyramiding=1, sma1=21, sma2=55):
+	def __init__(self, candles, pyramiding=1, sma1=55, sma2=100):
 		super().__init__(candles, pyramiding)
 		self.ma1 = Sma(sma1)
 		self.ma2 = Sma(sma2)
