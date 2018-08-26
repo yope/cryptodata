@@ -149,10 +149,33 @@ class Chart {
 	}
 }
 
+class CommandHandler {
+	constructor(chart) {
+		this.chart = chart;
+	}
+
+	handle_object(obj) {
+		switch(obj.class) {
+		case "candle":
+			let c = new Candle(this.chart, obj.data);
+			break;
+		case "chart":
+			this.chart.set_window(obj.begintime, obj.endtime, obj.minprice, obj.maxprice);
+			break;
+		default:
+			console.log("Undefined command object:", obj.class);
+		}
+	}
+}
+
 function main()
 {
 	let svg = document.getElementById("svg-main");
 	let chart = new Chart(svg, 1534158000, 1535281200, 5000, 8000);
+	let cmdh = new CommandHandler(chart);
+
+	let ws = new WS.WSock(cmdh);
+/*
 	let c0 = new Candle(chart, {
 		open:6323.43, close:6458.91, low:6248.39, high:6501.13,
 		opents:1534806000, length:43200
@@ -169,6 +192,7 @@ function main()
 		open:6671.47, close:6367.21, low:6264.34, high:6697.93,
 		opents:1534935600, length:43200
 	});
+	*/
 }
 
 return {
