@@ -7,11 +7,14 @@
 
 import os
 import sys
+import asyncio
 from candletools.candle import Candle
 from candletools.indicators import Sma, Ema
 from strategies.base import StopLoss, BaseStrategy
 from strategies.tradingview import OutsideBarStrategy, PivotalReversalStrategy
 from datasource.cryptocompare import Coindata
+from plotting.server import HTTPServer
+from concurrent.futures import CancelledError
 
 class SmaCrossStrategy(BaseStrategy):
 	def __init__(self, candles, pyramiding=1, sma1=55, sma2=100):
@@ -43,6 +46,84 @@ class MacdStrategy(SmaCrossStrategy):
 		super().__init__(candles, pyramiding, sma1=ema, sma2=sma)
 		self.ma1 = Ema(ema)
 		self.golden = False
+
+
+class PlotWsHandler:
+	def __init__(self, websock, pserver):
+		print("New WS connection")
+		self.pserver = pserver
+		self.ws = websock
+
+	async def coro_mainloop(self):
+		while True:
+			try:
+				obj = await self.ws.receive_json()
+			except CancelledError:
+				break
+			except (TypeError, ValueError):
+				await self.ws.close()
+				self.pserver.del_connection(self)
+				return
+			await self.on_message(obj)
+		print("WS connection closed")
+		await self.ws.close()
+		self.pserver.del_connection(self)
+
+	async def on_message(self, obj):
+		print("Received WS message: {!r}".format(obj))
+		await asyncio.sleep(0)
+		if not "command" in obj:
+			print("Unkknown object received: {!r}".format(obj))
+			return
+		cmd = obj["command"]
+		if cmd == "get_candles":
+			for c in self.pserver.candles:
+				await self.ws.send_json({
+					"class": "candle",
+					"data": c.pack_data()
+				})
+		elif cmd == "get_chart":
+			n = len(self.pserver.candles)
+			cl = self.pserver.candles[-1].length
+			dt = n * cl
+			endtime = self.pserver.candles[-1].opents + cl
+			begintime = endtime - dt - cl
+			await self.ws.send_json({
+				"class": "chart",
+				"begintime": begintime,
+				"endtime": endtime,
+				"minprice": self.pserver.strategy.pmin,
+				"maxprice": self.pserver.strategy.pmax
+			})
+
+class PlotServer:
+	def __init__(self, candles, strategy):
+		self.httpd = HTTPServer()
+		self.loop = asyncio.get_event_loop()
+		self.candles = candles
+		self.strategy = strategy
+		self.httpd.register_websocket("/pricedata", self.on_wsconnection)
+		self.connections = []
+
+	def run(self):
+		self.loop.run_forever()
+
+	async def on_wsconnection(self, websock, path):
+		h = PlotWsHandler(websock, self)
+		await h.coro_mainloop()
+
+	def add_connection(self, client):
+		self.connections.append(client)
+
+	def del_connection(self, client):
+		try:
+			self.connections.remove(client)
+		except ValueError:
+			pass
+
+	async def coro_queue(self, obj):
+		for c in self.connections:
+			await c.coro_queue(obj)
 
 if __name__ == "__main__":
 	args = sys.argv[1:]
@@ -86,3 +167,6 @@ if __name__ == "__main__":
 	print("  Total capital lost in losing trades:{:5.2f}".format(s.total_loss))
 	print("  Total capital won in winning trades:{:5.2f}".format(s.total_win))
 	print("  Total pnl:{:5.2f}".format(s.equity - s.startcapital))
+
+	s = PlotServer(candles, s)
+	s.run()
