@@ -90,6 +90,7 @@ class Candle extends BaseObject {
 class Chart {
 	constructor(svg, begintime, endtime, minprice, maxprice) {
 		this.svg = svg;
+		this.axg = svg.firstElementChild;
 		this.objects = [];
 		this.set_window(begintime, endtime, minprice, maxprice);
 	}
@@ -100,15 +101,47 @@ class Chart {
 		this.minprice = minprice;
 		this.maxprice = maxprice;
 		this.handle_resize();
+		this.redraw_axes();
 	}
 
 	set_size() {
-		this.width = this.svg.clientWidth;
-		this.height = this.svg.clientHeight;
+		this.outer_width = this.svg.clientWidth;
+		this.width = this.outer_width - 200;
+		this.outer_height = this.svg.clientHeight;
+		this.height = this.outer_height - 20;
+		this.svg.setAttributeNS(null, "width", this.svg.width);
+		this.svg.setAttributeNS(null, "height", this.height);
 	}
 
-	clear() {
-		this.svg.innerHTML = ""; // FIXME: Inefficient
+	make_text(x, y, color, text) {
+		let t = document.createElementNS(svgns, "text");
+		t.setAttributeNS(null, "x", x);
+		t.setAttributeNS(null, "y", y);
+		t.innerHTML = text;
+		t.setAttributeNS(null, "fill", color);
+		t.setAttributeNS(null, "stroke", null);
+		t.setAttributeNS(null, "font-size", 10);
+		return t;
+	}
+
+	redraw_axes() {
+		let prange = this.maxprice - this.minprice;
+		let steps = 20.0
+		let dp = prange / steps;
+		this.axg.innerHTML = "";
+		for (let i = 0; i < steps; i ++) {
+			let p = this.minprice + i * dp;
+			let y = this.p2y(p);
+			let l = document.createElementNS(svgns, "line");
+			l.setAttributeNS(null, "x1", 0);
+			l.setAttributeNS(null, "x2", this.width);
+			l.setAttributeNS(null, "y1", y);
+			l.setAttributeNS(null, "y2", y);
+			l.setAttributeNS(null, "stroke", "#e0e0e0");
+			this.axg.appendChild(l);
+			let t = this.make_text(this.width, y, "black", p.toFixed(8));
+			this.axg.appendChild(t);
+		}
 	}
 
 	redraw() {
