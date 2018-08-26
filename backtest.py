@@ -47,7 +47,7 @@ class MacdStrategy(SmaCrossStrategy):
 if __name__ == "__main__":
 	args = sys.argv[1:]
 	if len(args) < 4:
-		print("Usage: ./cryptodata.py <token> <fiat> <tf> <n> [<strategy>]")
+		print("Usage: ./backtest.py <token> <fiat> <tf> <n> [<strategy>]")
 		print("\n  where <token> is the name of the asset (btc, eth, etc...),")
 		print("        <fiat> is the fiat currency to trade against (usd, eur, etc...")
 		print("        <tf> is the time-frame (1h, 12h, 1D, ...)")
