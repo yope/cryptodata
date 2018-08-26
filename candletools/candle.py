@@ -1,5 +1,5 @@
 #
-# vim: set tabstop=4 noexpandtab:
+# vim: set tabstop=4 noexpandtab shiftwidth=4:
 #
 # Copyright (c) 2018 David Jander
 #
