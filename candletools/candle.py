@@ -78,3 +78,18 @@ class Candle:
 		else:
 			tabove = ""
 		print(offs + color + lwick + body + hwick + "\x1b[0m" + tabove)
+
+	def pack_data(self):
+		obj = {
+			"open": self.open,
+			"close": self.close,
+			"high": self.high,
+			"low": self.low,
+			"opents": self.opents,
+			"length": self.length,
+			"volumefrom": self.volumefrom,
+			"volumeto": self.volumeto,
+			"textabove": self.textabove,
+			"textbelow": self.textbelow
+		}
+		return obj
