@@ -246,6 +246,13 @@ class CommandHandler {
 		case "chart":
 			let minp = this._norm_price(obj.minprice, 10, Math.floor);
 			let maxp = this._norm_price(obj.maxprice, 10, Math.ceil);
+			let rangep = maxp - minp;
+			let real_r = obj.maxprice - obj.minprice;
+			console.log(real_r, rangep);
+			if ((real_r / rangep) < 0.4) {
+				minp = this._norm_price(obj.minprice, 100, Math.floor);
+				maxp = this._norm_price(obj.maxprice, 100, Math.ceil);
+			}
 			this.chart.set_window(obj.begintime, obj.endtime, minp, maxp);
 			break;
 		default:
