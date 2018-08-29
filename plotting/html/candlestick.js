@@ -115,7 +115,7 @@ class Candle extends BaseObject {
 		for (let i = 0, il = this.t_above.length; i < il; i++) {
 			let t = this.t_above[i];
 			t.setAttributeNS(null, "x", p0[0]);
-			t.setAttributeNS(null, "y", ymax - 10 - i * 10);
+			t.setAttributeNS(null, "y", ymax - i * 10);
 		}
 	}
 }
