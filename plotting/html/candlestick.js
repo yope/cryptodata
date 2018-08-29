@@ -142,7 +142,7 @@ class Chart {
 		this.width = this.outer_width - 200;
 		this.outer_height = this.svg.clientHeight;
 		this.height = this.outer_height - 20;
-		this.svg.setAttributeNS(null, "width", this.svg.width);
+		this.svg.setAttributeNS(null, "width", this.width);
 		this.svg.setAttributeNS(null, "height", this.height);
 	}
 
